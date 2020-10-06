@@ -1,5 +1,7 @@
 input_helper = dict()
 q_a = dict()
+constants = {"$tram_id":['0','1'],'$station_id':['a','b','c']}
+variables = list()
 def add_to_dict(dictionary,value,key):
 	space = value.find(' ')
 	firstWord = value[:space+1]
@@ -24,6 +26,9 @@ def remove_solo(key,dictionary):
 		return (key,dictionary);
 	res = dict()
 	if len(dictionary.keys()) == 1:
+		if list(dictionary.keys())[0].startswith('$'):
+			(tk,dc) = remove_solo('',list(dictionary.values())[0])
+			return  (key,{list(dictionary.keys())[0]:{tk:dc}})
 		return remove_solo(key.strip() + " " + list(dictionary.keys())[0],list(dictionary.values())[0])
 	else:
 		for k in dictionary.keys():
@@ -40,9 +45,33 @@ def print_dict(dictionary,cnt):
 			print('    '*cnt + dictionary[k])
 
 res = remove_solo('',input_helper)[1]
+#print_dict(res,0)
 
 def navigate_user(dictionary,string,prev):
 	found = False
+	if list(dictionary.keys())[0].startswith('$'):
+		key = list(dictionary.keys())[0].strip()
+		if string.strip() == '':
+			print('Можливі значення '+key.replace('$','').replace('?','') + ':')
+			print('\t'.join(constants[key.replace('?','')]))
+			return (False,{})
+		global variables
+		toFind = string.replace('?','')
+		if string.find(' ')!=-1:
+			toFind = string[:string.find(' ')]
+		if toFind in constants[key.replace('?','')]:
+			variables.append(toFind)
+			if '?' in key:
+				return (True,list(dictionary.values())[0])
+			if string.find(' ') == -1 or string.find(' ') == len(string):
+				return navigate_user(list(dictionary.values())[0],'',prev + string)
+			else:
+				return navigate_user(list(dictionary.values())[0],string[string.find(' ')+1:],prev + string[:string.find(' ')]+' ')
+		else:
+			print('Не вдалося знайти {} {}'.format(key.replace('$','').replace('?',''),toFind))
+			print('Можливі значення '+key.replace('$','').replace('?','') + ':')
+			print('\t'.join(constants[key.replace('?','')]))
+			return (False,{})
 	if string != '':
 		for k in dictionary.keys():
 			if string.startswith(k.strip()) or string in k:
@@ -54,6 +83,13 @@ def navigate_user(dictionary,string,prev):
 					return navigate_user(dictionary[k],string[len(k):],prev + k)
 
 	if not found:
+		for word in string.split(' '):
+			found_two = False
+			for k in dictionary.keys():
+				if word in k:
+					found_two = True
+			if not found_two:
+				print("Unknown word : " + word)
 		for k in dictionary.keys():
 			if k.endswith('?'):
 				print(prev + k)
@@ -61,4 +97,4 @@ def navigate_user(dictionary,string,prev):
 				print(prev + k + '...')
 	return (False,{})
 
-navigate_user(res,'Ч','')
+print(navigate_user(res,'Чи можна дістатися із зупинки a до зупинки c','')[0])
