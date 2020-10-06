@@ -7,12 +7,18 @@ stations = list()
 def read_routes(filename):
     ''' key : tram_id
         Value : [forth_direction list, back direction list] '''
-
-    return routes
+    with open(filename, encoding='utf-8', mode='r') as f:
+        content = [i.split("#") for i in f.read().split("$")]
+        for i in content:
+            global routes
+            routes[i[0].strip()] = [i[1].strip().splitlines(), i[2].strip().splitlines()]
 
 def read_all_stations(filename):
-    return stations
+    with open(filename, encoding='utf-8', mode='r') as f:
+        global stations
+        stations = f.read().splitlines()
 
+#1 query
 def count_of_stations_for_tram(tram_id):
     res = set(routes[tram_id][0] + routes[tram_id][1])
     return len(res)
@@ -20,6 +26,7 @@ def count_of_stations_for_tram(tram_id):
 def get_trams_for_station():
     return list()
 
+#2 query
 def count_of_all_routes():
     res = len(routes)
     return res
@@ -72,6 +79,19 @@ while continue_execution:
         state = int(input("Maka a choice pls >>> "))
     except ValueError:
         print("Choose from a list!")
+        continue
     if state == 1:
         print("Thanks for usage! Really appreciate that!")
         continue_execution = False
+    if state == 2:
+        print("All stops file")
+        filename = input(">>> ")
+        read_all_stations(filename)
+        for i in stations:
+            print(i)
+    if state == 3:
+        print("All routes file")
+        filename = input(">>> ")
+        read_routes(filename)
+        print(routes)
+        
