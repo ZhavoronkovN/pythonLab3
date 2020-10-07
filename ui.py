@@ -1,6 +1,6 @@
 input_helper = dict()
 q_a = dict()
-constants = {"$tram_id":['0','1'],'$station_id':['a','b','c']}
+constants = {"$tram_id":['0','1'],'$station_id':['aaaba','b','c']}
 variables = list()
 def add_to_dict(dictionary,value,key):
 	space = value.find(' ')
@@ -47,11 +47,34 @@ def print_dict(dictionary,cnt):
 res = remove_solo('',input_helper)[1]
 #print_dict(res,0)
 
+def myIn(string,findIn):
+	smaller = string if len(string) < len(findIn) else findIn
+	bigger = string if smaller == findIn else findIn
+	if smaller in bigger:
+		return True
+	count = 0
+	for i in range(len(smaller)):
+		if smaller[i] == bigger[i]:
+			count += 1
+	return (count/(float)(len(smaller)))>=0.5
+
+def myInSet(string, arr):
+	if string in arr:
+		return (True,string)
+	for el in arr:
+		if myIn(string,el):
+			return (True,el)
+	return (False,'')
+
 def navigate_user(dictionary,string,prev):
 	found = False
 	if list(dictionary.keys())[0].startswith('$'):
 		key = list(dictionary.keys())[0].strip()
 		if string.strip() == '':
+			if '?' in key:
+				print(prev + key.replace('$',''))
+			else:
+				print(prev + key.replace('$','') + ' ...')
 			print('Можливі значення '+key.replace('$','').replace('?','') + ':')
 			print('\t'.join(constants[key.replace('?','')]))
 			return (False,{})
@@ -59,25 +82,26 @@ def navigate_user(dictionary,string,prev):
 		toFind = string.replace('?','')
 		if string.find(' ')!=-1:
 			toFind = string[:string.find(' ')]
-		if toFind in constants[key.replace('?','')]:
-			variables.append(toFind)
+		(inSet, properName) = myInSet(toFind,constants[key.replace('?','')])
+		if inSet:
+			variables.append(properName)
 			if '?' in key:
 				return (True,list(dictionary.values())[0])
 			if string.find(' ') == -1 or string.find(' ') == len(string):
-				return navigate_user(list(dictionary.values())[0],'',prev + string)
+				return navigate_user(list(dictionary.values())[0],'',prev + properName)
 			else:
-				return navigate_user(list(dictionary.values())[0],string[string.find(' ')+1:],prev + string[:string.find(' ')]+' ')
+				return navigate_user(list(dictionary.values())[0],string[string.find(' ')+1:],prev + properName+' ')
 		else:
 			print('Не вдалося знайти {} {}'.format(key.replace('$','').replace('?',''),toFind))
 			print('Можливі значення '+key.replace('$','').replace('?','') + ':')
 			print('\t'.join(constants[key.replace('?','')]))
 			return (False,{})
+
 	if string != '':
 		for k in dictionary.keys():
-			if string.startswith(k.strip()) or string in k:
+			if myIn(k.strip(),string.strip()):
 				found = True
 				if k.endswith('?'):
-					print(prev + k)
 					return (True,dictionary[k])
 				else:
 					return navigate_user(dictionary[k],string[len(k):],prev + k)
@@ -97,4 +121,4 @@ def navigate_user(dictionary,string,prev):
 				print(prev + k + '...')
 	return (False,{})
 
-print(navigate_user(res,'Чи можна дістатися із зупинки a до зупинки c','')[0])
+print(navigate_user(res,'Скільки зупинок між','')[0])
