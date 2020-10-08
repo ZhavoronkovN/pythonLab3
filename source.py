@@ -1,5 +1,7 @@
 # 2020, all rights reserved
 
+from collections import namedtuple as tuple
+
 #global variables
 routes = dict()
 stations = list()
@@ -23,8 +25,13 @@ def count_of_stations_for_tram(tram_id):
     res = set(routes[tram_id][0] + routes[tram_id][1])
     return len(res)
 
-def get_trams_for_station():
-    return list()
+#7 query
+def get_trams_for_station(station):
+    res = list()
+    for i in routes:
+        if station in routes[i][1] + routes[i][2]:
+            res.append(i)
+    return res
 
 #2 query
 def count_of_all_routes():
@@ -37,6 +44,10 @@ def get_diff_in_stations(start_station, end_station):
 def print_route(tram_id):
     return str()
 
+def get_stations_for_tram(tram_id):
+    res = routes[tram_id][0] + routes[tram_id][1]
+    return res
+
 def get_to_university():
     return list()
 
@@ -44,8 +55,27 @@ def is_possible_to_get(station_id, tram_id):
     return False
 
 def howto_get_to(start_station, end_station):
-    return list()
+    route = tuple("route", ["tram_id", "start_station", "end_station", "direction"])
+    res = list()
+    for i in routes:
+        current_variant = list()
+        if start_station in get_stations_for_tram(i):
+            if end_station in get_stations_for_tram(i):
+                if routes[i][0].index(start_station) < routes[i][0].index(end_station):
+                    res.append(route(i, start_station, end_station, routes[i][0][len(routes[i][0])-1]))
+                else:
+                    res.append(route(i, start_station, end_station, routes[i][1][len(routes[i][1])-1]))
+            else:
+                for j in routes:
+                    if end_station in routes[j][0]:
+                        intersection = list(set(routes[j][0]) - set(routes[i][0]))
+                        change_station = intersection[0]
+                    elif end_station in routes[j][1]:
 
+                        
+
+
+            
 def write_to_file_dialog(content):
     ''' @param content : list of strings
         introduce console dialog for writrinf to file
@@ -94,4 +124,8 @@ while continue_execution:
         filename = input(">>> ")
         read_routes(filename)
         print(routes)
+    if state == 4:
+        howto_get_to("вул. Сахарова", "вул. Русових")
+        print_route("###")
+        howto_get_to("вул. Русових", "вул. Сахарова")
         
