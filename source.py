@@ -48,95 +48,76 @@ def get_stations_for_tram(tram_id):
     res = routes[tram_id][0] + routes[tram_id][1]
     return res
 
-def get_to_university():
+def get_to_university(station_):
     return list()
 
 def is_possible_to_get(station_id, tram_id):
     return False
 
-def howto_get_to(start_station, end_station):
-    route = tuple("route", ["tram_id", "start_station", "end_station", "direction"])
-    res = list()
-    for i in routes:
-        current_variant = list()
-        if start_station in get_stations_for_tram(i):
-            if end_station in get_stations_for_tram(i):
-                if routes[i][0].index(start_station) < routes[i][0].index(end_station):
-                    res.append(route(i, start_station, end_station, routes[i][0][len(routes[i][0])-1]))
-                else:
-                    res.append(route(i, start_station, end_station, routes[i][1][len(routes[i][1])-1]))
-            else:
-                for j in routes:
-                    if end_station in routes[j][0]:
-                        intersection = list(set(routes[j][0]) - set(routes[i][0]))
-                        change_station = intersection[0]
-                    elif end_station in routes[j][1]:
+def is_before(found_list, start_station, end_station):
+    start = found_list.index(start_station)
+    end = found_list.index(end_station)
+    return start < end
 
-                        
 def get_route_from_list(found_list,start_station,end_station):
-	smallerIndex = found_list.find(start_station)
-	biggerIndex = found_list.find(end_station)
-	if smallerIndex > biggerIndex:
-		temp = smallerIndex
-		smallerIndex = biggerIndex
-		biggerIndex = temp
-	return found_list[smallerIndex:biggerIndex]
+    start = found_list.index(start_station)
+    end = found_list.index(end_station)
+    return found_list[start:end+1]
 
 def howto_get_to_n(start_station,end_station):
-	stations_set = set([start_station,end_station])
-	found_list = list()
-	if True: #both can be found on single tram
-
-		for k in routes.keys():
-			if start_station in routes[k][0] and end_station in routes[k][0]: # in forward
-				found_list = list(routes[k][0])
-				break
-			elif start_station in routes[k][1] and end_station in routes[k][1]: # in backward
-				found_list = list(routes[k][1])
-				break
-
-		if len(found_list) != 0: # so we successed
-			return get_route_from_list(found_list)
-
-	elif True: #check with one peresadka
-
-		for t1 in routes.keys():
-			known_station = object()
-			unknown_station = object()
-			if start_station in routes[t1][0]: 
-				known_station = start_station
-				unknown_station = end_station
-				found_list = routes[t1][0]
-			elif start_station in routes[t1][1]:
-				known_station = start_station
-				unknown_station = end_station
-				found_list = routes[t1][1]
-			elif end_station in routes[t1][0]:
-				known_station = end_station
-				unknown_station = start_station
-				found_list = routes[t1][0]
-			elif end_station in routes[t1][1]:
-				known_station = end_station
-				unknown_station = start_station
-				found_list = routes[t1][1]
-			else:
-				continue
-
-			for t2 in routes.keys():
-				if t1 == t2:
-					continue
-				if unknown_station in routes[t2][0]:
-					common_stations = list(set(found_list & routes[t2][0]))
-					if len(common_station) != 0:
-						common_station = common_stations[0]
-						return get_route_from_list(found_list,known_station,common_station) + get_route_from_list(routes[t2][0],common_station,unknown_station)
-				elif unknown_station in routes[t2][1]:
-					common_stations = list(set(found_list & routes[t2][1]))
-					if len(common_station) != 0:
-						common_station = common_stations[0]
-						return get_route_from_list(found_list,known_station,common_station) + get_route_from_list(routes[t2][1],common_station,unknown_station)
-
-	return [] #more than one peresadka, len pisat
+    found_list = list()
+    # with no redirections
+    for k in routes:
+        if start_station in routes[k][0] and end_station in routes[k][0] and is_before(routes[k][0], start_station, end_station):
+            found_list = routes[k][0]
+            print("no redirections by " + k)
+            return get_route_from_list(found_list, start_station, end_station)
+        elif start_station in routes[k][1] and end_station in routes[k][1] and is_before(routes[k][1], start_station, end_station): # in backward
+            found_list = routes[k][1]
+            print("no redirections by " + k)
+            return get_route_from_list(found_list, start_station, end_station)
+            
+    for t1 in routes:
+        print("#" + t1)
+        known_station = object()
+        unknown_station = object()
+        state = True
+        if start_station in routes[t1][0] and state:
+            known_station = start_station
+            unknown_station = end_station
+            found_list = routes[t1][0]
+            state = False
+        elif start_station in routes[t1][1] and state:
+            known_station = start_station
+            unknown_station = end_station
+            found_list = routes[t1][1]
+            state = False
+        elif end_station in routes[t1][0] and state:
+            known_station = end_station
+            unknown_station = start_station
+            found_list = routes[t1][0]
+            state = False
+        elif end_station in routes[t1][1] and state:
+            known_station = end_station
+            unknown_station = start_station
+            found_list = routes[t1][1]
+            state = False
+        for t2 in routes.keys():
+            if t1 == t2:
+                continue
+            if unknown_station in routes[t2][0]:
+                common_stations = list(set(found_list).intersection(set(routes[t2][0])))
+                if len(common_stations) != 0:
+                    common_station = common_stations[0]
+                    print("#" + t2)
+                    return get_route_from_list(found_list, start_station, common_station) + get_route_from_list(routes[t2][0], common_station, unknown_station)
+            elif unknown_station in routes[t2][1]:
+                common_stations = list(set(found_list).intersection(routes[t2][1]))
+                if len(common_stations) != 0:
+                    common_station = common_stations[len(common_stations)-1]
+                    print("#" + t2)
+                    return get_route_from_list(found_list, known_station, common_station) + get_route_from_list(routes[t2][1], common_station, unknown_station) 
+    return list()
 
             
 def write_to_file_dialog(content):
@@ -185,10 +166,8 @@ while continue_execution:
     if state == 3:
         print("All routes file")
         filename = input(">>> ")
-        read_routes(filename)
+        read_routes("all_trams.txt")
         print(routes)
     if state == 4:
-        howto_get_to("вул. Сахарова", "вул. Русових")
-        print_route("###")
-        howto_get_to("вул. Русових", "вул. Сахарова")
-        
+        print("1")
+        print(howto_get_to_n("станція Підзамче", "вул. Русових"))
