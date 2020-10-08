@@ -73,7 +73,70 @@ def howto_get_to(start_station, end_station):
                     elif end_station in routes[j][1]:
 
                         
+def get_route_from_list(found_list,start_station,end_station):
+	smallerIndex = found_list.find(start_station)
+	biggerIndex = found_list.find(end_station)
+	if smallerIndex > biggerIndex:
+		temp = smallerIndex
+		smallerIndex = biggerIndex
+		biggerIndex = temp
+	return found_list[smallerIndex:biggerIndex]
 
+def howto_get_to_n(start_station,end_station):
+	stations_set = set([start_station,end_station])
+	found_list = list()
+	if True: #both can be found on single tram
+
+		for k in routes.keys():
+			if start_station in routes[k][0] and end_station in routes[k][0]: # in forward
+				found_list = list(routes[k][0])
+				break
+			elif start_station in routes[k][1] and end_station in routes[k][1]: # in backward
+				found_list = list(routes[k][1])
+				break
+
+		if len(found_list) != 0: # so we successed
+			return get_route_from_list(found_list)
+
+	elif True: #check with one peresadka
+
+		for t1 in routes.keys():
+			known_station = object()
+			unknown_station = object()
+			if start_station in routes[t1][0]: 
+				known_station = start_station
+				unknown_station = end_station
+				found_list = routes[t1][0]
+			elif start_station in routes[t1][1]:
+				known_station = start_station
+				unknown_station = end_station
+				found_list = routes[t1][1]
+			elif end_station in routes[t1][0]:
+				known_station = end_station
+				unknown_station = start_station
+				found_list = routes[t1][0]
+			elif end_station in routes[t1][1]:
+				known_station = end_station
+				unknown_station = start_station
+				found_list = routes[t1][1]
+			else:
+				continue
+
+			for t2 in routes.keys():
+				if t1 == t2:
+					continue
+				if unknown_station in routes[t2][0]:
+					common_stations = list(set(found_list & routes[t2][0]))
+					if len(common_station) != 0:
+						common_station = common_stations[0]
+						return get_route_from_list(found_list,known_station,common_station) + get_route_from_list(routes[t2][0],common_station,unknown_station)
+				elif unknown_station in routes[t2][1]:
+					common_stations = list(set(found_list & routes[t2][1]))
+					if len(common_station) != 0:
+						common_station = common_stations[0]
+						return get_route_from_list(found_list,known_station,common_station) + get_route_from_list(routes[t2][1],common_station,unknown_station)
+
+	return [] #more than one peresadka, len pisat
 
             
 def write_to_file_dialog(content):
