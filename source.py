@@ -31,7 +31,7 @@ def count_of_stations_for_tram(tram_id):
 #2 query
 def count_of_all_routes():
     res = len(routes)
-    return res
+    return (True,[res])
 
 #3 query
 def get_diff_in_stations(start_station, end_station):
@@ -54,7 +54,7 @@ def get_diff_in_stations(start_station, end_station):
     return (ans, res)
 
 #4 query 
-def is_possible_to_get(station_id, tram_id):
+def is_possible_to_get(tram_id,station_id):
     ans = station_id in set(routes[tram_id][0] + routes[tram_id][1])
     res = list()
     if ans == False:
@@ -67,8 +67,11 @@ def is_possible_to_get(station_id, tram_id):
 #5 query 
 def is_possible_to_get_station(start_station, end_station):
     route = howto_get_to_n(start_station, end_station)
+    if len(route) == 0:
+        return (True,[])
     ans = len(route) == 1
     res = list()
+    print(route)
     if ans == False:
         res.append(route[1][0])
         res.append(route[0][1][len(route[0][1])-1])
@@ -89,7 +92,7 @@ def get_stations_for_tram(tram_id):
         ans = False
     if ans:
         res.append(tram_id)
-        res.append(st)
+        res.append(', '.join(st))
     return (ans, res)
 
 #7 query
@@ -101,7 +104,7 @@ def get_trams_for_station(station):
             res.append(i)
     if len(res) == 0:
         ans = False
-    return (ans, res)
+    return (ans, [station,','.join(res)])
 
 #8 query 
 def get_to_university(start_station):
@@ -113,6 +116,8 @@ def get_to_university(start_station):
 def route_btw_stations(start_station, end_station):
     route = howto_get_to_n(start_station, end_station)
     res = list()
+    if len(route) == 0:
+        return (True,['3',routes['3'][0][0]])
     ans = len(route) == 1
     res.append(route[0][0])
     if ans:
@@ -180,7 +185,7 @@ def howto_get_to_n(start_station,end_station):
                     common_stations = list(set(direction1) & set(direction2))
                     if len(common_stations) != 0:
                         common_station = common_stations[0]
-                        if known_station == start_station:
+                        if known_station == start_station.lower():
                             return [(t1,get_route_from_list(direction1, known_station, common_station)), (t2,get_route_from_list(direction2, common_station, unknown_station))]
                         else:
                             return [(t2,get_route_from_list(direction2, unknown_station, common_station)), (t1,get_route_from_list(direction1, common_station, known_station))]
@@ -316,17 +321,10 @@ def give_result(answer,dictionary):
 
 do_all_preparations()
 
-print(get_diff_in_stations("станція Підзамче", "вул. Русових"))
-print(is_possible_to_get("станція Підзамче", "1"))
-print(is_possible_to_get_station("станція Підзамче", "вул. Русових"))
-print(get_stations_for_tram("6"))
-print(get_trams_for_station("Головна Пошта"))
-print(route_btw_stations("станція Підзамче", "вул. Русових"))
-print(get_to_university("станція Підзамче"))
-
 print('Введіть питання, початок питання чи просто натисніть "Enter" : ')
 while(True):
     variables = list()
+    print()
     (questionFull,handler) = navigate_user(questions,input(),'')
     if questionFull:
         if '' in handler.keys():
