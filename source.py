@@ -7,6 +7,109 @@ questions = dict()
 constants = dict()
 variables = list()
 
+
+#1 query
+def count_of_stations_for_tram(tram_id):
+    res = set(routes[tram_id][0] + routes[tram_id][1])
+    return len(res)
+
+#2 query
+def count_of_all_routes():
+    res = len(routes)
+    return res
+
+#3 query
+def get_diff_in_stations(start_station, end_station):
+    return list()
+
+#4 query 
+def is_possible_to_get(station_id, tram_id):
+    return False  
+
+#5 query 
+def is_possible_to_get_station(start_station, end_station):
+    return False  
+
+#6 query
+def get_stations_for_tram(tram_id):
+    res = routes[tram_id][0] + routes[tram_id][1]
+    return res 
+
+def print_route(tram_id):
+    return str()
+
+#7 query
+def get_trams_for_station(station):
+    res = list()
+    for i in routes:
+        if station in routes[i][1] + routes[i][2]:
+            res.append(i)
+    return res
+
+#8 query 
+def get_to_university(station_):
+    return list()
+
+
+def get_route_from_list(direction,start_station,end_station):
+    start = listLower(direction).index(start_station.lower())
+    end = listLower(direction).index(end_station.lower())
+    reverse = False
+    if start > end:
+        temp = start
+        start = end
+        end = temp
+        reverse = True
+    res = direction[start:end+1]
+    if reverse:
+        res.reverse()
+    return res
+
+#9 query
+def howto_get_to_n(start_station,end_station):
+    # with no redirections
+    for k in routes:
+        for direction in routes[k]:
+            if start_station.lower() in listLower(direction) and end_station.lower() in listLower(direction):
+                return (k,get_route_from_list(direction, start_station, end_station))
+    # with one redirection 
+    for t1 in routes:
+        direction1 = list()
+        known_station = object()
+        unknown_station = object()
+
+        for direction in routes[t1]:
+            if start_station.lower() in listLower(direction):
+                known_station = start_station.lower()
+                unknown_station = end_station.lower()
+                direction1 = direction
+                break
+            elif end_station.lower() in listLower(direction):
+                known_station = end_station.lower()
+                unknown_station = start_station.lower()
+                direction1 = direction
+                break
+
+        if len(direction1) == 0:
+            continue
+
+        for t2 in routes:
+            if t1 == t2:
+                continue
+            for direction2 in routes[t2]:
+                if unknown_station in listLower(direction2):
+                    common_stations = list(set(direction1) & set(direction2))
+                    if len(common_stations) != 0:
+                        common_station = common_stations[0]
+                        return [(t1,get_route_from_list(direction1, known_station, common_station)), (t2,get_route_from_list(direction2, common_station, unknown_station))]
+    # more than one redirection
+    return list()
+
+
+actions = [count_of_stations_for_tram,count_of_all_routes,get_diff_in_stations,is_possible_to_get,is_possible_to_get_station,
+get_stations_for_tram,get_trams_for_station,get_to_university,howto_get_to_n]
+actions.reverse()
+
 def read_routes(filename):
     ''' key : tram_id
         Value : [forth_direction list, back direction list] '''
@@ -54,7 +157,7 @@ def read_questions(filename):
             qa = line.split('->')
             question = qa[0].strip();
             answers = qa[1].split('&')
-            answers = {"+" : answers[0],"-" : answers[1], 'func' : howto_get_to_n}
+            answers = {"+" : answers[0],"-" : answers[1], 'func' : actions.pop()}
             add_to_dict(temp,question,answers)
     global questions
     questions = remove_solo('',temp)[1]
@@ -67,107 +170,8 @@ def do_all_preparations():
     constants['$station_id'] = stations
 
 
-
-#1 query
-def count_of_stations_for_tram(tram_id):
-    res = set(routes[tram_id][0] + routes[tram_id][1])
-    return len(res)
-
-#2 query
-def count_of_all_routes():
-    res = len(routes)
-    return res
-
-#3 query
-def get_diff_in_stations(start_station, end_station):
-    return list()
-
-#4 query 
-def is_possible_to_get(station_id, tram_id):
-    return False  
-
-#5 query 
-def is_possible_to_get_station(start_station, end_station):
-    return False  
-
-#6 query
-def get_stations_for_tram(tram_id):
-    res = routes[tram_id][0] + routes[tram_id][1]
-    return res 
-
-def print_route(tram_id):
-    return str()
-
-#7 query
-def get_trams_for_station(station):
-    res = list()
-    for i in routes:
-        if station in routes[i][1] + routes[i][2]:
-            res.append(i)
-    return res
-
-#8 query 
-def get_to_university(station_):
-    return list()
-
-#9 query
-def howto_get_to_n(start_station,end_station):
-    # with no redirections
-    for k in routes:
-        for direction in routes[k]:
-            if start_station.lower() in listLower(direction) and end_station.lower() in listLower(direction):
-                return (k,get_route_from_list(direction, start_station, end_station))
-    # with one redirection 
-    for t1 in routes:
-        direction1 = list()
-        known_station = object()
-        unknown_station = object()
-
-        for direction in routes[t1]:
-            if start_station.lower() in listLower(direction):
-                known_station = start_station.lower()
-                unknown_station = end_station.lower()
-                direction1 = direction
-                break
-            elif end_station.lower() in listLower(direction):
-                known_station = end_station.lower()
-                unknown_station = start_station.lower()
-                direction1 = direction
-                break
-
-        if len(direction1) == 0:
-            continue
-
-        for t2 in routes:
-            if t1 == t2:
-                continue
-            for direction2 in routes[t2]:
-                if unknown_station in listLower(direction2):
-                    common_stations = list(set(direction1) & set(direction2))
-                    if len(common_stations) != 0:
-                        common_station = common_stations[0]
-                        return [(t1,get_route_from_list(direction1, known_station, common_station)), (t2,get_route_from_list(direction2, common_station, unknown_station))]
-    # more than one redirection
-    return list()
-
-def get_route_from_list(direction,start_station,end_station):
-    start = listLower(direction).index(start_station.lower())
-    end = listLower(direction).index(end_station.lower())
-    reverse = False
-    if start > end:
-        temp = start
-        start = end
-        end = temp
-        reverse = True
-    res = direction[start:end+1]
-    if reverse:
-        res.reverse()
-    return res
-
 def listLower(lst):
     return [x.lower() for x in lst]
-
-
 
 def navigate_user(dictionary,string,prev):
     found = False
@@ -229,6 +233,6 @@ while(True):
     variables = list()
     (questionFull,handler) = navigate_user(questions,input(),'')
     if questionFull:
-        handler = handler['']
-        print(variables)
+        if '' in handler.keys():
+            handler = handler['']
         print(handler['func'](*variables))
