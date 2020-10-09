@@ -150,7 +150,7 @@ def howto_get_to_n(start_station,end_station):
             if t1 == t2:
                 continue
             for direction2 in routes[t2]:
-                if unknown_station in direction2:
+                if unknown_station in listLower(direction2):
                     common_stations = list(set(direction1) & set(direction2))
                     if len(common_stations) != 0:
                         common_station = common_stations[0]
