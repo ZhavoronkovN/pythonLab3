@@ -73,6 +73,31 @@ def count_of_stations_for_tram(tram_id):
     res = set(routes[tram_id][0] + routes[tram_id][1])
     return len(res)
 
+#2 query
+def count_of_all_routes():
+    res = len(routes)
+    return res
+
+#3 query
+def get_diff_in_stations(start_station, end_station):
+    return list()
+
+#4 query 
+def is_possible_to_get(station_id, tram_id):
+    return False  
+
+#5 query 
+def is_possible_to_get_station(start_station, end_station):
+    return False  
+
+#6 query
+def get_stations_for_tram(tram_id):
+    res = routes[tram_id][0] + routes[tram_id][1]
+    return res 
+
+def print_route(tram_id):
+    return str()
+
 #7 query
 def get_trams_for_station(station):
     res = list()
@@ -81,44 +106,11 @@ def get_trams_for_station(station):
             res.append(i)
     return res
 
-#2 query
-def count_of_all_routes():
-    res = len(routes)
-    return res
-
-def get_diff_in_stations(start_station, end_station):
-    return list()
-
-def print_route(tram_id):
-    return str()
-
-def get_stations_for_tram(tram_id):
-    res = routes[tram_id][0] + routes[tram_id][1]
-    return res
-
+#8 query 
 def get_to_university(station_):
     return list()
 
-def is_possible_to_get(station_id, tram_id):
-    return False
-
-def get_route_from_list(direction,start_station,end_station):
-    start = listLower(direction).index(start_station.lower())
-    end = listLower(direction).index(end_station.lower())
-    reverse = False
-    if start > end:
-        temp = start
-        start = end
-        end = temp
-        reverse = True
-    res = direction[start:end+1]
-    if reverse:
-        res.reverse()
-    return res
-
-def listLower(lst):
-    return [x.lower() for x in lst]
-
+#9 query
 def howto_get_to_n(start_station,end_station):
     # with no redirections
     for k in routes:
@@ -157,6 +149,25 @@ def howto_get_to_n(start_station,end_station):
                         return [(t1,get_route_from_list(direction1, known_station, common_station)), (t2,get_route_from_list(direction2, common_station, unknown_station))]
     # more than one redirection
     return list()
+
+def get_route_from_list(direction,start_station,end_station):
+    start = listLower(direction).index(start_station.lower())
+    end = listLower(direction).index(end_station.lower())
+    reverse = False
+    if start > end:
+        temp = start
+        start = end
+        end = temp
+        reverse = True
+    res = direction[start:end+1]
+    if reverse:
+        res.reverse()
+    return res
+
+def listLower(lst):
+    return [x.lower() for x in lst]
+
+
 
 def navigate_user(dictionary,string,prev):
     found = False
