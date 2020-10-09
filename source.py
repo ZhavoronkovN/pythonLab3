@@ -10,7 +10,7 @@ variables = list()
 
 #1 query
 def count_of_stations_for_tram(tram_id):
-    res = set(routes[tram_id][0] + routes[tram_id][1])
+    res = list(set(routes[tram_id][0] + routes[tram_id][1]))
     return len(res)
 
 #2 query
@@ -20,15 +20,22 @@ def count_of_all_routes():
 
 #3 query
 def get_diff_in_stations(start_station, end_station):
-    return list()
+    res = howto_get_to_n(start_station, end_station)
+    count = 0
+    for i in res:
+        count += len(i[1])
+    return count
 
 #4 query 
 def is_possible_to_get(station_id, tram_id):
-    return False  
+    ans = station_id in get_stations_for_tram(tram_id)
+    return ans
 
 #5 query 
 def is_possible_to_get_station(start_station, end_station):
-    return False  
+    res = howto_get_to_n(start_station, end_station)
+    ans = len(res) > 0
+    return ans
 
 #6 query
 def get_stations_for_tram(tram_id):
@@ -47,8 +54,10 @@ def get_trams_for_station(station):
     return res
 
 #8 query 
-def get_to_university(station_):
-    return list()
+def get_to_university(start_station):
+    end_station = "Головна Пошта"
+    res = howto_get_to_n(start_station, end_station)
+    return res
 
 
 def get_route_from_list(direction,start_station,end_station):
@@ -138,7 +147,7 @@ def read_questions(filename):
 
     def remove_solo(key,dictionary):
         if '+' in dictionary.keys() and '-' in dictionary.keys():
-            return (key,dictionary);
+            return (key,dictionary)
         res = dict()
         if len(dictionary.keys()) == 1:
             if list(dictionary.keys())[0].startswith('$'):
@@ -155,7 +164,7 @@ def read_questions(filename):
     with open(filename,'r',encoding = 'UTF-8') as questionsFile:
         for line in questionsFile.readlines():
             qa = line.split('->')
-            question = qa[0].strip();
+            question = qa[0].strip()
             answers = qa[1].split('&')
             answers = {"+" : answers[0],"-" : answers[1], 'func' : actions.pop()}
             add_to_dict(temp,question,answers)
