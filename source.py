@@ -7,12 +7,27 @@ questions = dict()
 constants = dict()
 variables = list()
 
+def is_sublist(ls1, ls2):
+    l1 = "".join(ls1)
+    l2 = "".join(ls2)
+    return l1 in l2
+
 
 #1 query
 def count_of_stations_for_tram(tram_id):
-    res = list(set(routes[tram_id][0] + routes[tram_id][1]))
-    return len(res)
-
+    ans = True
+    try:
+        stations = list(set([i.strip() for i in routes[tram_id][0] + routes[tram_id][1]]))
+    except:
+        ans = False
+    res = list()
+    if ans:
+        res.append(len(stations))
+    return (ans, res)
+'''
+[('1', ['вул. Русових', 'пл. Кропивницького']), 
+('6', ['пл. Кропивницького', 'Церква святої Анни', 'вул. Наливайка', 'пл. Старий Ринок', 'вул. Під Дубом', 'Палац культури ім. Гната Хоткевича', 'станція Підзамче'])]
+'''
 #2 query
 def count_of_all_routes():
     res = len(routes)
@@ -20,45 +35,100 @@ def count_of_all_routes():
 
 #3 query
 def get_diff_in_stations(start_station, end_station):
-    res = howto_get_to_n(start_station, end_station)
+    route = howto_get_to_n(start_station, end_station)
     count = 0
-    for i in res:
+    res = list()
+    ans = len(route) <= 1
+    for i in route:
         count += len(i[1])
-    return count
+    if ans == False:
+        res.append(count - 3)
+        res.append(route[1][0])
+        res.append(route[0][1][len(route[0][1])-1])
+        if is_sublist(route[1][1],routes[route[1][0]][0]):
+            res.append(routes[route[1][0]][0][len(routes[route[1][0]][0])-1])
+        else:
+            res.append(routes[route[1][0]][1][len(routes[route[1][0]][1])-1])
+    else:
+        res.append(count - 2)
+    return (ans, res)
 
 #4 query 
 def is_possible_to_get(station_id, tram_id):
-    ans = station_id in get_stations_for_tram(tram_id)
-    return ans
+    ans = station_id in set(routes[tram_id][0] + routes[tram_id][1])
+    res = list()
+    if ans == False:
+        for i in routes:
+            if station_id in set(routes[i][0] + routes[i][1]):
+                res.append(i)
+                break
+    return (ans, res)
 
 #5 query 
 def is_possible_to_get_station(start_station, end_station):
-    res = howto_get_to_n(start_station, end_station)
-    ans = len(res) > 0
-    return ans
+    route = howto_get_to_n(start_station, end_station)
+    ans = len(route) == 1
+    res = list()
+    if ans == False:
+        res.append(route[1][0])
+        res.append(route[0][1][len(route[0][1])-1])
+        if is_sublist(route[1][1], routes[route[1][0]][0]):
+            res.append(routes[route[1][0]][0][len(routes[route[1][0]][0])-1])
+        else:
+            res.append(routes[route[1][0]][1][len(routes[route[1][0]][1])-1])
+    return (ans, res)
 
 #6 query
 def get_stations_for_tram(tram_id):
-    res = routes[tram_id][0] + routes[tram_id][1]
-    return res 
-
-def print_route(tram_id):
-    return str()
+    ans = True
+    res = list()
+    tram_id = tram_id.strip()
+    try:
+        st = list(set(routes[tram_id][0] + routes[tram_id][1]))
+    except:
+        ans = False
+    if ans:
+        res.append(tram_id)
+        res.append(st)
+    return (ans, res)
 
 #7 query
 def get_trams_for_station(station):
     res = list()
+    ans = True
     for i in routes:
-        if station in routes[i][1] + routes[i][2]:
+        if station in routes[i][0] + routes[i][1]:
             res.append(i)
-    return res
+    if len(res) == 0:
+        ans = False
+    return (ans, res)
 
 #8 query 
 def get_to_university(start_station):
     end_station = "Головна Пошта"
-    res = howto_get_to_n(start_station, end_station)
+    res = route_btw_stations(start_station, end_station)
     return res
 
+#9 query
+def route_btw_stations(start_station, end_station):
+    route = howto_get_to_n(start_station, end_station)
+    res = list()
+    ans = len(route) == 1
+    res.append(route[0][0])
+    if ans:
+        if is_sublist(route[0][1], routes[route[0][0]][0]):
+            res.append(routes[route[0][0]][0][len(routes[route[0][0]][0])-1])
+        else:
+            res.append(routes[route[0][0]][1][len(routes[route[0][0]][1])-1])
+    else:
+        res.append(route[0][1][len(route[0][1]) - 1])
+        res.append(route[1][0])
+        if is_sublist(route[1][1], routes[route[0][0]][0]):
+            res.append(routes[route[0][0]][0][len(routes[route[0][0]][0])-1])
+        else:
+            res.append(routes[route[0][0]][1][len(routes[route[0][0]][1])-1])
+        res.append(end_station)
+    return (ans, res)
 
 def get_route_from_list(direction,start_station,end_station):
     start = listLower(direction).index(start_station.lower())
@@ -80,7 +150,7 @@ def howto_get_to_n(start_station,end_station):
     for k in routes:
         for direction in routes[k]:
             if start_station.lower() in listLower(direction) and end_station.lower() in listLower(direction):
-                return (k,get_route_from_list(direction, start_station, end_station))
+                return [(k,get_route_from_list(direction, start_station, end_station))]
     # with one redirection 
     for t1 in routes:
         direction1 = list()
@@ -115,8 +185,7 @@ def howto_get_to_n(start_station,end_station):
     return list()
 
 
-actions = [count_of_stations_for_tram,count_of_all_routes,get_diff_in_stations,is_possible_to_get,is_possible_to_get_station,
-get_stations_for_tram,get_trams_for_station,get_to_university,howto_get_to_n]
+actions = [count_of_stations_for_tram, count_of_all_routes, get_diff_in_stations, is_possible_to_get, is_possible_to_get_station, get_stations_for_tram, get_trams_for_station,get_to_university, route_btw_stations]
 actions.reverse()
 
 def read_routes(filename):
@@ -237,6 +306,15 @@ def navigate_user(dictionary,string,prev):
     return (False,{})
 
 do_all_preparations()
+
+print(get_diff_in_stations("станція Підзамче", "вул. Русових"))
+print(is_possible_to_get("станція Підзамче", "1"))
+print(is_possible_to_get_station("станція Підзамче", "вул. Русових"))
+print(get_stations_for_tram("6"))
+print(get_trams_for_station("Головна Пошта"))
+print(route_btw_stations("станція Підзамче", "вул. Русових"))
+print(get_to_university("станція Підзамче"))
+
 print('Введіть питання, початок питання чи просто натисніть "Enter" : ')
 while(True):
     variables = list()
