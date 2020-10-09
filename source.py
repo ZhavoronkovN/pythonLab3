@@ -180,7 +180,10 @@ def howto_get_to_n(start_station,end_station):
                     common_stations = list(set(direction1) & set(direction2))
                     if len(common_stations) != 0:
                         common_station = common_stations[0]
-                        return [(t1,get_route_from_list(direction1, known_station, common_station)), (t2,get_route_from_list(direction2, common_station, unknown_station))]
+                        if known_station == start_station:
+                            return [(t1,get_route_from_list(direction1, known_station, common_station)), (t2,get_route_from_list(direction2, common_station, unknown_station))]
+                        else:
+                            return [(t2,get_route_from_list(direction2, unknown_station, common_station)), (t1,get_route_from_list(direction1, common_station, known_station))]
     # more than one redirection
     return list()
 
@@ -264,26 +267,26 @@ def navigate_user(dictionary,string,prev):
             print('\t'.join(constants[key.replace('?','')]))
             return (False,{})
         global variables
-        toFind = string.replace('?','')
-        if string.strip().startswith('"'):
-            toFind = string[string.find('"'):]
+        toFind = string.replace('?','').strip()
+        if toFind.startswith('"'):
+            toFind = toFind[toFind.find('"'):]
             toFind = toFind[:toFind[1:].find('"')+2]
         else:
-            toFind = string.strip().split(' ')[0]
+            toFind = toFind.split(' ')[0]
         if toFind.lower().strip().replace('"','') in [x.lower().strip() for x in constants[key.replace('?','')]]:
-            variables.append(toFind.lower().replace('"',''))
+            variables.append(toFind.replace('"',''))
             if '?' in key:
                 return (True,list(dictionary.values())[0])
-            return navigate_user(list(dictionary.values())[0],string[string.find(toFind)+len(toFind):],prev + toFind.strip())
+            return navigate_user(list(dictionary.values())[0],string[string.find(toFind)+len(toFind):],prev + toFind.strip()+' ')
         else:
             print('Не вдалося знайти {} {}'.format(key.replace('$','').replace('?',''),toFind))
             print('Можливі значення '+key.replace('$','').replace('?','') + ':')
             print('\t'.join(constants[key.replace('?','')]))
             return (False,{})
 
-    if string != '':
+    if string.strip() != '':
         for k in dictionary.keys():
-            if k.lower().startswith(string.lower()) or string.lower().startswith(k.lower()):
+            if k.lower().strip().startswith(string.lower().strip()) or string.lower().strip().startswith(k.lower().strip()):
                 found = True
                 if k.endswith('?'):
                     return (True,dictionary[k])
@@ -305,6 +308,12 @@ def navigate_user(dictionary,string,prev):
                 print(prev + k + '...')
     return (False,{})
 
+def give_result(answer,dictionary):
+    if answer[0]:
+        print(dictionary['+'].format(*answer[1]))
+    else:
+        print(dictionary['-'].format(*answer[1]))
+
 do_all_preparations()
 
 print(get_diff_in_stations("станція Підзамче", "вул. Русових"))
@@ -322,4 +331,4 @@ while(True):
     if questionFull:
         if '' in handler.keys():
             handler = handler['']
-        print(handler['func'](*variables))
+        give_result(handler['func'](*variables),handler)
