@@ -88,6 +88,7 @@ def get_stations_for_tram(tram_id):
         ans = False
     if ans:
         res.append(tram_id)
+        res.append(st[0] + " <---> " + st[len(st)-1])
         res.append(', '.join(st))
     return (ans, res)
 
