@@ -68,7 +68,6 @@ def is_possible_to_get_station(start_station, end_station):
         return (True,[])
     ans = len(route) == 1
     res = list()
-    print(route)
     if ans == False:
         res.append(route[1][0])
         res.append(route[0][1][len(route[0][1])-1])
@@ -106,8 +105,10 @@ def get_trams_for_station(station):
 #8 query 
 def get_to_university(start_station):
     end_station = "Головна Пошта"
-    res = route_btw_stations(start_station, end_station)
-    return res
+    (ans,lst) = route_btw_stations(start_station, end_station)
+    if ans:
+        lst.append(end_station)
+    return (ans,lst)
 
 #9 query
 def route_btw_stations(start_station, end_station):
@@ -119,16 +120,16 @@ def route_btw_stations(start_station, end_station):
     res.append(route[0][0])
     if ans:
         if is_sublist(route[0][1], routes[route[0][0]][0]):
-            res.append(routes[route[0][0]][0][len(routes[route[0][0]][0])-1])
+            res.append(routes[route[0][0]][0][-1])
         else:
-            res.append(routes[route[0][0]][1][len(routes[route[0][0]][1])-1])
+            res.append(routes[route[0][0]][1][-1])
     else:
-        res.append(route[0][1][len(route[0][1]) - 1])
+        res.append(route[1][1][0])
         res.append(route[1][0])
-        if is_sublist(route[1][1], routes[route[0][0]][0]):
-            res.append(routes[route[0][0]][0][len(routes[route[0][0]][0])-1])
+        if is_sublist(route[1][1], routes[route[1][0]][0]):
+            res.append(routes[route[1][0]][0][-1])
         else:
-            res.append(routes[route[0][0]][1][len(routes[route[0][0]][1])-1])
+            res.append(routes[route[1][0]][1][-1])
         res.append(end_station)
     return (ans, res)
 
