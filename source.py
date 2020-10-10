@@ -206,6 +206,7 @@ def read_all_stations(filename):
     with open(filename, encoding='utf-8', mode='r') as f:
         global stations
         stations = f.read().splitlines()
+        stations.sort()
 
 def read_questions(filename):
     def add_to_dict(dictionary,value,key):
